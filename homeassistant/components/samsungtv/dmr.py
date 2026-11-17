@@ -32,11 +32,13 @@ class SamsungTVDmrDevice:
         ssdp_rendering_control_location: str,
         host: str,
         on_event_callback: Callable[[], None],
+        listen_port: int | None = None,
     ) -> None:
         """Initialize the DMR device wrapper."""
         self._hass = hass
         self._ssdp_rendering_control_location = ssdp_rendering_control_location
         self._host = host
+        self._listen_port = listen_port
         self._on_event_callback = on_event_callback
         self._dmr_device: DmrDevice | None = None
         self._upnp_server: AiohttpNotifyServer | None = None
@@ -83,7 +85,7 @@ class SamsungTVDmrDevice:
         _, event_ip = await async_get_local_ip(
             self._ssdp_rendering_control_location, self._hass.loop
         )
-        source = (event_ip or "0.0.0.0", 0)
+        source = (event_ip or "0.0.0.0", self._listen_port or 0)
         self._upnp_server = AiohttpNotifyServer(
             requester=upnp_requester,
             source=source,

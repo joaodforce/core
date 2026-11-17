@@ -4,6 +4,7 @@ from copy import deepcopy
 from datetime import timedelta
 from unittest.mock import DEFAULT as DEFAULT_MOCK, AsyncMock, Mock, call, patch
 
+from async_upnp_client.event_handler import UpnpEventHandler
 from async_upnp_client.exceptions import (
     UpnpActionResponseError,
     UpnpCommunicationError,
@@ -46,6 +47,7 @@ from homeassistant.components.media_player import (
     MediaType,
 )
 from homeassistant.components.samsungtv.const import (
+    CONF_LISTEN_PORT,
     CONF_SSDP_RENDERING_CONTROL_LOCATION,
     DOMAIN,
     ENCRYPTED_WEBSOCKET_PORT,
@@ -1423,6 +1425,28 @@ async def test_upnp_subscribe_events_upnpresponseerror(
 
     upnp_notify_server.async_stop_server.assert_not_called()
     assert "Device rejected subscription" in caplog.text
+
+
+@pytest.mark.usefixtures("remote_websocket", "rest_api", "dmr_device")
+async def test_upnp_listen_port_option(hass: HomeAssistant) -> None:
+    """Test the Upnp event listener uses the configured port."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=MOCK_ENTRY_WS,
+        options={CONF_LISTEN_PORT: 8059},
+        entry_id="123456",
+        unique_id="be9554b9-c9fb-41f4-8920-22da015376a4",
+    )
+    entry.add_to_hass(hass)
+
+    with patch(
+        "homeassistant.components.samsungtv.dmr.AiohttpNotifyServer", autospec=True
+    ) as notify_server_class:
+        notify_server_class.return_value.event_handler = Mock(UpnpEventHandler)
+        await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    assert notify_server_class.call_args.kwargs["source"] == ("10.10.10.10", 8059)
 
 
 @pytest.mark.usefixtures("remote_websocket", "rest_api", "upnp_notify_server")

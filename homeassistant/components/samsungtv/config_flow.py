@@ -13,6 +13,7 @@ from homeassistant.config_entries import (
     ConfigEntryState,
     ConfigFlow,
     ConfigFlowResult,
+    OptionsFlow,
 )
 from homeassistant.const import (
     CONF_HOST,
@@ -44,6 +45,7 @@ from .bridge import (
     model_may_require_encryption,
 )
 from .const import (
+    CONF_LISTEN_PORT,
     CONF_MANUFACTURER,
     CONF_SESSION_ID,
     CONF_SSDP_MAIN_TV_AGENT_LOCATION,
@@ -113,6 +115,15 @@ class SamsungTVConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 2
     MINOR_VERSION = 2
+
+    @staticmethod
+    @callback
+    @override
+    def async_get_options_flow(
+        config_entry: SamsungTVConfigEntry,
+    ) -> SamsungTVOptionsFlow:
+        """Get the options flow for this handler."""
+        return SamsungTVOptionsFlow()
 
     _host: str
     _bridge: SamsungTVBridge
@@ -684,5 +695,26 @@ class SamsungTVConfigFlow(ConfigFlow, domain=DOMAIN):
                         TextSelectorConfig(autocomplete="one-time-code")
                     )
                 }
+            ),
+        )
+
+
+OPTIONS_SCHEMA = probatio.Schema({probatio.Optional(CONF_LISTEN_PORT): probatio.Port()})
+
+
+class SamsungTVOptionsFlow(OptionsFlow):
+    """Handle Samsung TV options."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(
+                OPTIONS_SCHEMA, self.config_entry.options
             ),
         )

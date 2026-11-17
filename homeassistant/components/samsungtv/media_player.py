@@ -19,7 +19,12 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util.async_ import create_eager_task
 
 from .bridge import SamsungTVWSBridge
-from .const import CONF_SSDP_RENDERING_CONTROL_LOCATION, DOMAIN, LOGGER
+from .const import (
+    CONF_LISTEN_PORT,
+    CONF_SSDP_RENDERING_CONTROL_LOCATION,
+    DOMAIN,
+    LOGGER,
+)
 from .coordinator import SamsungTVConfigEntry, SamsungTVDataUpdateCoordinator
 from .dmr import SamsungTVDmrDevice
 from .entity import SamsungTVEntity
@@ -90,6 +95,7 @@ class SamsungTVDevice(SamsungTVEntity, MediaPlayerEntity):
                 ssdp_rendering_control_location=self._ssdp_rendering_control_location,
                 host=self._host,
                 on_event_callback=self._on_dmr_event_callback,
+                listen_port=coordinator.config_entry.options.get(CONF_LISTEN_PORT),
             )
 
     @property

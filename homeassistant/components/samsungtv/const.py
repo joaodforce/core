@@ -16,6 +16,7 @@ CONF_MANUFACTURER = "manufacturer"
 CONF_SSDP_RENDERING_CONTROL_LOCATION = "ssdp_rendering_control_location"
 CONF_SSDP_MAIN_TV_AGENT_LOCATION = "ssdp_main_tv_agent_location"
 CONF_SESSION_ID = "session_id"
+CONF_LISTEN_PORT = "listen_port"
 
 RESULT_AUTH_MISSING = "auth_missing"
 RESULT_INVALID_PIN = "invalid_pin"

@@ -24,6 +24,7 @@ from homeassistant.components.samsungtv.config_flow import (
     _strip_uuid,
 )
 from homeassistant.components.samsungtv.const import (
+    CONF_LISTEN_PORT,
     CONF_MANUFACTURER,
     CONF_SESSION_ID,
     CONF_SSDP_MAIN_TV_AGENT_LOCATION,
@@ -2518,3 +2519,19 @@ async def test_dhcp_while_user_flow_pending(hass: HomeAssistant) -> None:
             data=dhcp_data,
         )
     assert result_dhcp["type"] is FlowResultType.ABORT
+
+
+async def test_options_flow(hass: HomeAssistant) -> None:
+    """Test setting the Upnp event listener port."""
+    entry = MockConfigEntry(domain=DOMAIN, data=ENTRYDATA_WEBSOCKET)
+    entry.add_to_hass(hass)
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "init"
+
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {CONF_LISTEN_PORT: 8059}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert entry.options == {CONF_LISTEN_PORT: 8059}

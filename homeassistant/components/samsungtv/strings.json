@@ -99,5 +99,17 @@
     "upnp_not_available": {
       "message": "Unable to set volume level on {host}, as UPnP services are not available."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "listen_port": "Event listener port"
+        },
+        "data_description": {
+          "listen_port": "Fixed port for receiving volume and mute events from the TV. Leave empty to use a random free port. Useful when a firewall sits between the TV and Home Assistant."
+        }
+      }
+    }
   }
 }
